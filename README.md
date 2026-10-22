@@ -29,6 +29,7 @@ Dự án được tái thiết kế và tối ưu hoàn toàn sang Python từ k
 - [Kiến trúc kỹ thuật & Mật mã học](#-kiến-trúc-kỹ-thuật--mật-mã-học)
 - [Kiểm thử (Testing)](#-kiểm-thử-testing)
 - [Cấu trúc thư mục](#-cấu-trúc-thư-mục)
+- [Liên kết & Công cụ hỗ trợ (Useful Links)](#-liên-kết--công-cụ-hỗ-trợ-useful-links)
 - [Tuyên bố miễn trừ trách nhiệm (Disclaimer)](#-tuyên-bố-miễn-trừ-trách-nhiệm-disclaimer)
 
 ---
@@ -266,6 +267,13 @@ drama_downloader/
     ├── hongguo.py       # Hongguo / Fanqie extractor
     └── goodbos_aggregators.py # DramaWave, RaptDrama, FlexTV, StardustTV
 ```
+
+---
+
+## 🔗 Liên kết & Công cụ hỗ trợ (Useful Links)
+
+- 🌐 **Website chính thức:** [https://www.tnkre.dev/](https://www.tnkre.dev/)
+- 🛠️ **Công cụ Decompiler Online:** [https://decompile.tnkre.dev/](https://decompile.tnkre.dev/)
 
 ---
 
