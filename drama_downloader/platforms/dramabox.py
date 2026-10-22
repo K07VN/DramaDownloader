@@ -41,7 +41,6 @@ class DramaBoxPlatform(BasePlatform):
         description = ""
         episodes: List[Episode] = []
 
-        # 1. Scrape Next.js metadata from dramaboxdb.com
         db_url = f"https://www.dramaboxdb.com/movie/{book_id}/drama"
         resp = self.http.get(db_url)
         if resp.status_code == 200:
@@ -75,7 +74,6 @@ class DramaBoxPlatform(BasePlatform):
                 except Exception:
                     pass
 
-        # 2. If locked episodes exist, query Goodbos aggregator fallback
         locked_count = sum(1 for ep in episodes if ep.locked)
         if locked_count > 0 or not episodes:
             try:
@@ -90,7 +88,6 @@ class DramaBoxPlatform(BasePlatform):
                         gb_map = {item.get("chapterIndex"): item for item in gb_episodes if isinstance(item, dict)}
 
                         if not episodes:
-                            # Build directly from goodbos if dramaboxdb failed
                             for item in gb_episodes:
                                 ep_idx = item.get("chapterIndex", 0)
                                 ep_num = ep_idx + 1
@@ -111,7 +108,6 @@ class DramaBoxPlatform(BasePlatform):
                                     )
                                 )
                         else:
-                            # Update locked episodes
                             for ep in episodes:
                                 if ep.locked:
                                     gb_item = gb_map.get(ep.num - 1)

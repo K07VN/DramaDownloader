@@ -49,11 +49,10 @@ def _read_asn1_int(buf: bytes, offset: int):
 
 def _build_private_key():
     der = base64.b64decode(_DB_PEM_BODY)
-    # Extract inner RSAPrivateKey from PKCS#8 OCTET STRING
     octet_len = int.from_bytes(der[24:26], "big")
     rsa_der = der[26 : 26 + octet_len]
 
-    offset = 4  # skip SEQUENCE tag and length
+    offset = 4
     ver, offset = _read_asn1_int(rsa_der, offset)
     n, offset = _read_asn1_int(rsa_der, offset)
     e, offset = _read_asn1_int(rsa_der, offset)
@@ -64,7 +63,6 @@ def _build_private_key():
     dmq1_raw, offset = _read_asn1_int(rsa_der, offset)
     iqmp, offset = _read_asn1_int(rsa_der, offset)
 
-    # Standardize CRT exponents
     dmp1 = d % (p - 1)
     dmq1 = d % (q - 1)
 

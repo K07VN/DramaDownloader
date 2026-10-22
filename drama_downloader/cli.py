@@ -135,13 +135,11 @@ def main():
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    # Info command
     p_info = subparsers.add_parser("info", help="Inspect series metadata and episode list")
     p_info.add_argument("target", help="URL or Series ID")
     p_info.add_argument("-p", "--platform", help="Explicit platform name/ID")
     p_info.set_defaults(func=cmd_info)
 
-    # Download command
     p_dl = subparsers.add_parser("download", help="Download series or episodes")
     p_dl.add_argument("target", help="URL or Series ID")
     p_dl.add_argument("-p", "--platform", help="Explicit platform name/ID")
@@ -150,7 +148,6 @@ def main():
     p_dl.add_argument("-c", "--concurrency", type=int, default=2, help="Concurrency workers (default: 2)")
     p_dl.set_defaults(func=cmd_download)
 
-    # Catalog command
     p_cat = subparsers.add_parser("catalog", help="Browse catalog of short dramas")
     p_cat.add_argument("platform", help="Platform ID (e.g. dramabox, shortmax, kisskh)")
     p_cat.add_argument("--page", type=int, default=1, help="Page number")
@@ -158,7 +155,6 @@ def main():
     p_cat.add_argument("--category", help="Category filter")
     p_cat.set_defaults(func=cmd_catalog)
 
-    # Platforms command
     p_plat = subparsers.add_parser("platforms", help="List all supported platforms")
     p_plat.set_defaults(func=cmd_platforms)
 

@@ -82,7 +82,7 @@ class NetShortPlatform(BasePlatform):
                     url=f"https://netshort.com/drama/{ns_key}/{ep_num}",
                     direct_url=direct_url,
                     thumb=ep.get("episodeCover") or cover,
-                    locked=False,  # Can always be resolved via /watch
+                    locked=False,
                     subs=subs,
                     extra={"ns_key": ns_key, "ns_ep": ep_no, "ts": time.time() if direct_url else 0},
                 )
@@ -103,7 +103,6 @@ class NetShortPlatform(BasePlatform):
         ns_key = episode.extra.get("ns_key")
         ns_ep = episode.extra.get("ns_ep", episode.num)
 
-        # Token is fresh for ~6 hours
         ts = episode.extra.get("ts", 0)
         if episode.direct_url and ts and (time.time() - ts < 6 * 3600):
             return episode.direct_url

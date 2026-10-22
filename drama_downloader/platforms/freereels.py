@@ -35,7 +35,6 @@ class FreeReelsPlatform(BasePlatform):
         return m.group(1) if m else ""
 
     def _pick_mp4(self, item: Dict[str, Any]) -> Optional[str]:
-        # Try video_list or video_url or play_url
         vlist = item.get("video_list") or item.get("play_list") or []
         if isinstance(vlist, list) and vlist:
             for item_v in vlist:
@@ -57,7 +56,6 @@ class FreeReelsPlatform(BasePlatform):
         data = res_json.get("data") or res_json
         items = data.get("items") or data.get("episodes") or []
 
-        # Filter out bloopers
         valid_items = [it for it in items if not it.get("is_blooper")]
         if not valid_items:
             valid_items = items

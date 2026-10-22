@@ -43,7 +43,6 @@ class HongguoPlatform(BasePlatform):
 
         series_detail = None
 
-        # 1. Try modern.js loader API
         try:
             resp = self.http.get(
                 loader_url,
@@ -55,7 +54,6 @@ class HongguoPlatform(BasePlatform):
         except Exception:
             pass
 
-        # 2. Try HTML page fallback
         if not series_detail:
             resp = self.http.get(detail_url)
             if resp.status_code == 200:
@@ -116,7 +114,6 @@ class HongguoPlatform(BasePlatform):
         if not vid or not series_id:
             return None
 
-        # Fetch player page to resolve stream info
         player_url = f"{self.BASE_URL}/player/{series_id}?vid={vid}&__loader=player_page"
         try:
             resp = self.http.get(
@@ -126,13 +123,11 @@ class HongguoPlatform(BasePlatform):
             if resp.status_code == 200:
                 data = resp.json()
                 play_info = data.get("videoPlayInfo") or {}
-                # Video stream resolution
                 v_url = play_info.get("video_url") or play_info.get("play_url")
                 if v_url:
                     episode.direct_url = v_url
                     return v_url
 
-                # If spade encrypted
                 spade_a = play_info.get("spade_a")
                 enc_url = play_info.get("encrypted_url") or play_info.get("main_url")
                 if spade_a and enc_url:

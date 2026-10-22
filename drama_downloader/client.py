@@ -42,7 +42,6 @@ class HttpClient:
             headers.update(default_headers)
         self.session.headers.update(headers)
 
-        # Setup retry adapter
         retries = Retry(
             total=max_retries,
             backoff_factor=0.5,
@@ -113,5 +112,4 @@ class HttpClient:
         return resp.json()
 
 
-# Shared global instance
 http = HttpClient()

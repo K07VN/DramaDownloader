@@ -93,7 +93,6 @@ def decrypt_spade_url(encrypted_url: str, key_hex: str) -> str:
     decryptor = cipher.decryptor()
     decrypted = decryptor.update(body) + decryptor.finalize()
 
-    # Manual PKCS7 unpadding
     pad_len = decrypted[-1]
     if 1 <= pad_len <= 16 and pad_len <= len(decrypted):
         decrypted = decrypted[:-pad_len]

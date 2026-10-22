@@ -37,7 +37,6 @@ class GoodShortPlatform(BasePlatform):
 
         headers = {"User-Agent": "okhttp/4.10.0", "x-token": GOODBOS_TOKEN}
 
-        # 1. Fetch metadata
         name = "GoodShort Drama"
         cover = ""
         desc = ""
@@ -55,7 +54,6 @@ class GoodShortPlatform(BasePlatform):
         except Exception:
             pass
 
-        # 2. Fetch episodes list
         episodes: List[Episode] = []
         try:
             resp = self.http.get(
@@ -84,7 +82,6 @@ class GoodShortPlatform(BasePlatform):
         except Exception:
             pass
 
-        # Fallback if chapter list was empty but count > 0
         if not episodes and total_episodes > 0:
             for i in range(1, total_episodes + 1):
                 episodes.append(
@@ -120,7 +117,6 @@ class GoodShortPlatform(BasePlatform):
         if not book_id:
             return None
 
-        # Attempt to resolve single episode link
         try:
             resp = self.http.get(
                 f"{self.BASE_URL}/video/{book_id}/{episode.num}?lang=en&code={GOODBOS_TOKEN}",

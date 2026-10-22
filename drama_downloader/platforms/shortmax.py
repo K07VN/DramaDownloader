@@ -34,7 +34,6 @@ class ShortMaxPlatform(BasePlatform):
     def _pick_best_video(self, video_dict: Dict[str, Any]) -> Optional[str]:
         if not isinstance(video_dict, dict):
             return None
-        # Preferred order: 1080p, 720p, 540p, 480p, 360p, or any url
         for q in ["1080p", "720p", "540p", "480p", "360p"]:
             if video_dict.get(q):
                 return video_dict[q]
@@ -57,7 +56,6 @@ class ShortMaxPlatform(BasePlatform):
         data = res_json.get("data") or {}
         raw_episodes = data.get("episodes") or []
 
-        # Sort episodes
         raw_episodes = sorted(raw_episodes, key=lambda x: x.get("episode", 0))
 
         series_name = data.get("name") or "ShortMax Drama"
