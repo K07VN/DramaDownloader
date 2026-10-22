@@ -1,9 +1,14 @@
 # Drama Downloader (Python Core)
 
 <p align="center">
+  <img src="banner.png" alt="Drama Downloader Banner" width="100%" />
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/Python-3.8+-blue.svg?style=for-the-badge&logo=python" alt="Python 3.8+" />
   <img src="https://img.shields.io/badge/Platforms-11+-orange.svg?style=for-the-badge" alt="Supported Platforms" />
   <img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="License MIT" />
+  <img src="https://img.shields.io/badge/Subtitles-SRT%20%2F%20VTT-cyan.svg?style=for-the-badge" alt="Subtitles SRT / VTT" />
   <img src="https://img.shields.io/badge/CLI-Ready-purple.svg?style=for-the-badge" alt="CLI Ready" />
 </p>
 
@@ -20,6 +25,7 @@ Dự án được tái thiết kế và tối ưu hoàn toàn sang Python từ k
 - [Cài đặt](#-cài-đặt)
 - [Sử dụng dòng lệnh (CLI)](#-sử-dụng-dòng-lệnh-cli)
 - [Sử dụng trong mã nguồn Python (API)](#-sử-dụng-trong-mã-nguồn-python-api)
+- [Cơ chế xử lý Phụ đề (SRT / VTT Engine)](#-cơ-chế-xử-lý-phụ-đề-srt--vtt-engine)
 - [Kiến trúc kỹ thuật & Mật mã học](#-kiến-trúc-kỹ-thuật--mật-mã-học)
 - [Kiểm thử (Testing)](#-kiểm-thử-testing)
 - [Cấu trúc thư mục](#-cấu-trúc-thư-mục)
@@ -31,7 +37,8 @@ Dự án được tái thiết kế và tối ưu hoàn toàn sang Python từ k
 
 - ⚡ **Auto-Detection Router:** Tự động nhận diện nền tảng chỉ bằng liên kết phim (URL) hoặc Series ID.
 - 🔓 **Bypass DRM & Payload Obfuscation:** Tích hợp bộ giải mã Spade URL (ByteDance AES-128-CBC) và ký số RSA-SHA256 chuẩn hóa cho DramaBox.
-- 🚀 **Tải video đa luồng song song:** Tải đồng thời nhiều tập phim với cơ chế phân đoạn (chunk streaming), tự động đổi tên tệp an toàn và hỗ trợ tải phụ đề SRT/VTT.
+- 🚀 **Tải video đa luồng song song:** Tải đồng thời nhiều tập phim với cơ chế phân đoạn (chunk streaming) và tự động đổi tên tệp an toàn.
+- 🎯 **Tự động bóc tách & chuyển đổi phụ đề:** Tự động tải phụ đề đi kèm tập phim và chuyển đổi chuẩn hóa WebVTT sang SubRip (.srt) tương thích mọi thiết bị.
 - 💻 **Giao diện dòng lệnh (CLI) trực quan:** Xem trước danh sách tập, phân loại tập khóa/mở khóa (`[FREE] [HAS STREAM]`), tải theo dải tập (ví dụ: `1-10,15,20`).
 - 📦 **Kiến trúc Module hóa:** Dễ dàng tích hợp vào bot Telegram, FastAPI web service, hoặc crawler tự động.
 
@@ -66,8 +73,8 @@ Dự án được tái thiết kế và tối ưu hoàn toàn sang Python từ k
 
 ```bash
 # Clone dự án
-git clone https://github.com/your-username/drama-downloader.git
-cd drama-downloader
+git clone https://github.com/K07VN/DramaDownloader.git
+cd DramaDownloader
 
 # Cài đặt dependencies và module
 pip install -e .
@@ -150,14 +157,18 @@ for ep in series.episodes:
     print(f"EP{ep.num:02d}: {ep.title} -> {ep.direct_url}")
 ```
 
-### Tải video với Callback tiến trình
+### Tải video kèm Phụ đề tự động
 
 ```python
 from drama_downloader import DramaDownloader, load_series
 
 series = load_series("https://netshort.com/drama/12345678")
 
-downloader = DramaDownloader(output_dir="./downloads", concurrency=2)
+downloader = DramaDownloader(
+    output_dir="./downloads",
+    concurrency=2,
+    save_vtt=True  # Đặt True để lưu thêm file gốc .vtt song song với .srt
+)
 
 downloader.download_series(
     series,
@@ -166,6 +177,31 @@ downloader.download_series(
     on_episode_done=lambda ep, path: print(f"[✔] Hoàn thành: {path}"),
     on_episode_error=lambda ep, err: print(f"[x] Lỗi tập {ep.num}: {err}")
 )
+```
+
+---
+
+## 🎯 Cơ chế xử lý Phụ đề (SRT / VTT Engine)
+
+Module tích hợp sẵn bộ xử lý phụ đề thông minh:
+1. **Tự động bóc tách phụ đề đa ngôn ngữ:** Các nền tảng như NetShort, FreeReels, KissKH tự động trích xuất các đường dẫn phụ đề (`episode.subs`).
+2. **Chuẩn hóa WebVTT $\to$ SRT ([`vtt_to_srt()`](file:///c:/Users/K07VN/AppData/Local/DramaDownloader/drama_downloader/downloader.py)):**
+   - Tự động nhận diện định dạng WebVTT.
+   - Chuyển đổi timestamp dạng dấu chấm (`00:00:01.000`) sang dấu phẩy SubRip chuẩn (`00:00:01,000`).
+   - Tự động đánh số thứ tự câu thoại (`1, 2, 3...`) và lọc sạch thẻ HTML/WebVTT cue tags (`<c>`, `<b>`, `NOTE`).
+   - File `.srt` được lưu cùng tên với video, giúp các trình phát (VLC, Media Player, TV) hiển thị phụ đề ngay lập tức.
+
+```python
+import drama_downloader as dd
+
+vtt_content = """WEBVTT
+
+00:00:01.000 --> 00:00:03.500
+<b>Xin chào!</b> Đây là phim ngắn Drama Downloader.
+"""
+
+srt_content = dd.vtt_to_srt(vtt_content)
+print(srt_content)
 ```
 
 ---
@@ -188,7 +224,7 @@ Giải mã URL video được mã hóa qua cơ chế Spade:
 
 ## 🧪 Kiểm thử (Testing)
 
-Dự án đi kèm bộ unit tests hoàn chỉnh kiểm tra chữ ký RSA, Spade URL cipher và bộ định tuyến 11 platform:
+Dự án đi kèm bộ unit tests hoàn chỉnh kiểm tra chữ ký RSA, Spade URL cipher, bộ định tuyến 11 platform và bộ chuyển đổi phụ đề:
 
 ```bash
 python tests/test_module.py
@@ -196,11 +232,12 @@ python tests/test_module.py
 
 Kết quả:
 ```text
-Ran 3 tests in 0.056s
+Ran 4 tests in 0.056s
 OK
 [OK] All 10 platform detection tests passed
 [OK] Total active platforms: 11
 [OK] RSA signing test passed (signature identical to Node.js)
+[OK] VTT to SRT subtitle conversion test passed
 ```
 
 ---
@@ -209,14 +246,14 @@ OK
 
 ```
 drama_downloader/
-├── __init__.py           # Public exports
+├── __init__.py           # Public exports: load_series, DramaDownloader, vtt_to_srt
 ├── __main__.py          # Entrypoint thực thi CLI
 ├── cli.py               # Xử lý tham số dòng lệnh argparse
 ├── models.py            # Dataclasses: Series, Episode, Subtitle
 ├── client.py            # Session pooling & auto-retry
-├── downloader.py        # Quản lý tải song song đa luồng
+├── downloader.py        # Quản lý tải song song đa luồng & Subtitle Engine
 ├── crypto/
-│   ├── dramabox_rsa.py  # RSA-SHA256 signature
+│   ├── dramabox_rsa.py  # RSA-SHA256 signature (CRT normalized)
 │   └── spade.py         # ByteDance Spade cipher
 └── platforms/
     ├── base.py          # Lớp trừu tượng BasePlatform
