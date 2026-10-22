@@ -1,0 +1,55 @@
+# Electron runtime binaries & caches (Do NOT commit)
+/Drama Downloader.exe
+/Uninstall Drama Downloader.exe
+/*.dll
+/*.pak
+/*.bin
+/*.zip
+/*.log
+/*.ico
+/*.dat
+/*.installed_version
+/vk_swiftshader_icd.json
+/LICENSES.chromium.html
+/LICENSE.electron.txt
+/resources/
+/locales/
+/recovered_src/
+/recovered_src_clean/
+/recovered_source/
+/CLONE_SPEC.md
+/README_PYTHON.md
+
+# Python virtual environment & build
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+/env/
+/venv/
+/ENV/
+/build/
+/dist/
+/develop-eggs/
+/eggs/
+/.eggs/
+/parts/
+/sdist/
+/var/
+/wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Temporary outputs
+/downloads/
+*.part
