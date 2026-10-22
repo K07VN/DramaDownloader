@@ -44,6 +44,22 @@ class TestDramaDownloader(unittest.TestCase):
         self.assertGreaterEqual(len(platforms), 11)
         print(f"[OK] Total active platforms: {len(platforms)}")
 
+    def test_vtt_to_srt(self):
+        sample_vtt = """WEBVTT
+
+00:00:01.000 --> 00:00:03.500
+Hello World!
+
+00:00:04.000 --> 00:00:06.000
+<b>Welcome to Drama Downloader</b>
+"""
+        srt = dd.vtt_to_srt(sample_vtt)
+        self.assertIn("00:00:01,000 --> 00:00:03,500", srt)
+        self.assertIn("1\n", srt)
+        self.assertIn("Hello World!", srt)
+        self.assertIn("Welcome to Drama Downloader", srt)
+        print("[OK] VTT to SRT subtitle conversion test passed")
+
 
 if __name__ == "__main__":
     unittest.main()

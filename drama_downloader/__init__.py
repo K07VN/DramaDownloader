@@ -5,7 +5,7 @@ Multi-Platform Short Drama Extractor and Downloader Python Module.
 """
 
 from .models import Series, Episode, Subtitle, CatalogItem, CatalogResult
-from .downloader import DramaDownloader, DownloadProgress
+from .downloader import DramaDownloader, DownloadProgress, vtt_to_srt
 from .platforms import (
     load_series,
     detect_platform,
@@ -25,6 +25,7 @@ __all__ = [
     "CatalogResult",
     "DramaDownloader",
     "DownloadProgress",
+    "vtt_to_srt",
     "load_series",
     "detect_platform",
     "get_platform",

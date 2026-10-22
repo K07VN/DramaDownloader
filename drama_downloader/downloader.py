@@ -40,6 +40,49 @@ def sanitize_filename(name: str) -> str:
     return cleaned[:100] if cleaned else "video"
 
 
+def vtt_to_srt(vtt_text: str) -> str:
+    """Converts WebVTT subtitle text to standard SubRip (.srt) format."""
+    lines = vtt_text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+    output = []
+    idx = 1
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+        if not line or line.startswith("WEBVTT") or line.startswith("NOTE") or line.startswith("STYLE"):
+            if line.startswith("STYLE") or line.startswith("NOTE"):
+                while i < len(lines) and lines[i].strip():
+                    i += 1
+            i += 1
+            continue
+
+        # Match WebVTT timestamp line: 00:01.000 --> 00:04.000 or 00:00:01.000 --> 00:00:04.000
+        m = re.search(
+            r"(?:(\d{2}):)?(\d{2}):(\d{2})\.(\d{3})\s*-->\s*(?:(\d{2}):)?(\d{2}):(\d{2})\.(\d{3})",
+            line,
+        )
+        if m:
+            h1 = m.group(1) or "00"
+            m1, s1, ms1 = m.group(2), m.group(3), m.group(4)
+            h2 = m.group(5) or "00"
+            m2, s2, ms2 = m.group(6), m.group(7), m.group(8)
+            srt_timestamp = f"{h1}:{m1}:{s1},{ms1} --> {h2}:{m2}:{s2},{ms2}"
+
+            output.append(str(idx))
+            output.append(srt_timestamp)
+            idx += 1
+            i += 1
+            while i < len(lines) and lines[i].strip():
+                # Remove inline WebVTT cue tags (<c>, <b>, <i>, <v>)
+                cleaned_text = re.sub(r"<[^>]+>", "", lines[i].strip())
+                if cleaned_text:
+                    output.append(cleaned_text)
+                i += 1
+            output.append("")
+        else:
+            i += 1
+    return "\n".join(output)
+
+
 class DramaDownloader:
     """Download orchestrator for drama episodes and subtitles."""
 
@@ -48,10 +91,12 @@ class DramaDownloader:
         output_dir: str = "./downloads",
         concurrency: int = 2,
         client: Optional[HttpClient] = None,
+        save_vtt: bool = False,
     ):
         self.output_dir = output_dir
         self.concurrency = concurrency
         self.http = client or http
+        self.save_vtt = save_vtt
         os.makedirs(self.output_dir, exist_ok=True)
 
     def download_episode(
@@ -98,7 +143,7 @@ class DramaDownloader:
             os.remove(out_path)
         os.rename(part_path, out_path)
 
-        # Download subtitles if available
+        # Download and convert subtitles if available
         for sub in episode.subs:
             self._download_subtitle(sub, folder, ep_prefix)
 
@@ -106,20 +151,41 @@ class DramaDownloader:
 
     def _download_subtitle(self, sub: Subtitle, folder: str, ep_prefix: str):
         try:
-            sub_filename = f"{ep_prefix}_{sub.lang}.srt"
-            sub_path = os.path.join(folder, sub_filename)
+            raw_content = b""
             if sub.url.startswith("data:"):
-                # Embedded data url
                 import base64
                 data_part = sub.url.split(",", 1)[1]
-                content = base64.b64decode(data_part)
-                with open(sub_path, "wb") as f:
-                    f.write(content)
+                raw_content = base64.b64decode(data_part)
             else:
                 s_resp = self.http.get(sub.url)
                 if s_resp.status_code == 200:
-                    with open(sub_path, "wb") as f:
-                        f.write(s_resp.content)
+                    raw_content = s_resp.content
+
+            if not raw_content:
+                return
+
+            text_content = raw_content.decode("utf-8", errors="ignore")
+
+            # Check if WebVTT
+            is_vtt = "WEBVTT" in text_content[:50] or sub.url.endswith(".vtt")
+
+            if is_vtt:
+                # Optionally save raw VTT
+                if self.save_vtt:
+                    vtt_path = os.path.join(folder, f"{ep_prefix}_{sub.lang}.vtt")
+                    with open(vtt_path, "w", encoding="utf-8") as f:
+                        f.write(text_content)
+
+                # Convert WebVTT to standard SRT
+                srt_content = vtt_to_srt(text_content)
+                srt_path = os.path.join(folder, f"{ep_prefix}_{sub.lang}.srt")
+                with open(srt_path, "w", encoding="utf-8") as f:
+                    f.write(srt_content)
+            else:
+                # Direct SRT
+                srt_path = os.path.join(folder, f"{ep_prefix}_{sub.lang}.srt")
+                with open(srt_path, "wb") as f:
+                    f.write(raw_content)
         except Exception:
             pass
 
